@@ -3,3 +3,6 @@ dist/
 
 # ffmpeg
 *.wmv
+*.mp4
+
+*.jpg
