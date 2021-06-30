@@ -2,21 +2,24 @@ import { NextFunction, Request, Response } from "express";
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs'
 
-const PATH = './material';
+const MOVIE_PATH = './material/base/movie/';
+const PICTURE_PATH = './material/base/picture/';
+const RESULT_MOVIE_PATH = './material/result/movie/';
+const RESULT_PICTURE_PATH = './material/result/picture/';
 
 export const test = async (req: Request, res: Response, next: NextFunction) => {
   switch (parseInt(req.params.num)) {
     case 1:
-      sample1(PATH + '/base/movie/waves.mp4', PATH + '/result/movie/sample1.mp4');
+      sample1(`${MOVIE_PATH}waves.mp4`, `${RESULT_MOVIE_PATH}sample1.mp4`);
       break;
     case 2:
-      sample2(PATH + '/base/picture/umi.jpg', PATH + '/result/movie/sample2.mp4');
+      sample2(`${PICTURE_PATH}umi.jpg`, `${RESULT_MOVIE_PATH}sample2.mp4`);
       break;
     case 3:
-      sample3(PATH + '/base/movie/sora.mp4', PATH + '/base/movie/waves.mp4', PATH + '/result/movie/sample3.mp4');
+      sample3(`${MOVIE_PATH}sora.mp4`, `${MOVIE_PATH}waves.mp4`, `${RESULT_MOVIE_PATH}sample3.mp4`);
       break;
     case 4:
-      sample4(PATH + '/base/movie/waves.mp4', PATH + '/result/picture', 'sample4.jpg');
+      sample4(`${MOVIE_PATH}waves.mp4`, RESULT_PICTURE_PATH, 'sample4.jpg');
       break;
   }
   res.send("ok");
@@ -68,7 +71,14 @@ const sample4 = async (input_file: string, output_folder: string, output_file: s
       filename: output_file,
       size: '150x100'
     },
-      output_folder);
+      output_folder)
+  /*.screenshots({
+    count: 2,
+    timemarks: [0.0, 0.1],
+    filename: output_file,
+    folder: output_folder,
+    size: '150x100'
+  })*/
 }
 
 /*公式サイト　https://github.com/fluent-ffmpeg/node-fluent-ffmpeg
