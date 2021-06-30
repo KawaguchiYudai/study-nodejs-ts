@@ -12,6 +12,12 @@ export const test = async (req: Request, res: Response, next: NextFunction) => {
     case 2:
       sample2(PATH + '/base/picture/umi.jpg', PATH + '/result/movie/sample2.mp4');
       break;
+    case 3:
+      sample3(PATH + '/base/movie/sora.mp4', PATH + '/base/movie/waves.mp4', PATH + '/result/movie/sample3.mp4');
+      break;
+    case 4:
+      sample4(PATH + '/base/movie/waves.mp4', PATH + '/result/picture', 'sample4.jpg');
+      break;
   }
   res.send("ok");
 };
@@ -38,6 +44,31 @@ const sample2 = async (input_file: string, output_file: string) => {
     .on('end', () => { console.log(`変換完了`); })
     .on('error', function (err) { console.log('an error happened: ' + err.message); })
     .save(output_file)
+}
+//×
+const sample3 = async (input_file1: string, input_file2: string, output_file: string) => {
+  ffmpeg(input_file1)
+    .input(input_file2)
+    .fps(30)
+    .format('mp4')
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .mergeToFile(output_file)
+}
+//スクリーンショット作成
+const sample4 = async (input_file: string, output_folder: string, output_file: string) => {
+  ffmpeg(input_file)
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .takeScreenshots({
+      count: 2,
+      timemarks: ['00:00:02.000', '6'],
+      filename: output_file,
+      size: '150x100'
+    },
+      output_folder);
 }
 
 /*公式サイト　https://github.com/fluent-ffmpeg/node-fluent-ffmpeg
