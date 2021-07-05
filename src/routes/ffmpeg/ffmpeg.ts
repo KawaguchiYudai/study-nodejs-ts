@@ -21,6 +21,18 @@ export const test = async (req: Request, res: Response, next: NextFunction) => {
     case 4:
       sample4(`${MOVIE_PATH}waves.mp4`, RESULT_PICTURE_PATH, 'sample4.jpg');
       break;
+    case 5:
+      sample5(`${MOVIE_PATH}waves.mp4`, `${RESULT_MOVIE_PATH}sample5.mp4`);
+      break;
+    case 6:
+      sample6(`${MOVIE_PATH}waves.mp4`, `${RESULT_MOVIE_PATH}sample6.mp4`);
+      break;
+    case 7:
+      sample7(`${MOVIE_PATH}waves.mp4`, `${RESULT_PICTURE_PATH}sample7/`);
+      break;
+    case 8:
+      sample8(`${PICTURE_PATH}data/`, `${RESULT_MOVIE_PATH}sample8.mp4`);
+      break;
   }
   res.send("ok");
 };
@@ -80,7 +92,79 @@ const sample4 = async (input_file: string, output_folder: string, output_file: s
     size: '150x100'
   })*/
 }
-
+//サイズの変更、アスペクト比等によりあまり部分を黒くする
+const sample5 = async (input_file: string, output_file: string) => {
+  ffmpeg(input_file)
+    .videoBitrate(1024)
+    .fps(30)
+    .size('1920x1440')
+    .autopad()
+    .videoCodec('libx264')
+    .audioCodec('libmp3lame')
+    .format('mp4')
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .save(output_file)
+}
+//動画の描画サイズ変更
+const sample6 = async (input_file: string, output_file: string) => {
+  ffmpeg(input_file)
+    .videoBitrate(5120)
+    .fps(30)
+    .size('1920x1440')
+    .autopad()
+    .seekInput(5.0)
+    .duration(20.0)
+    .videoFilter([
+      {
+        filter: "crop",
+        options: {
+          w: 100,
+          h: 100,
+          x: 0,
+          y: 0
+        },
+      }
+    ])
+    .videoCodec('libx264')
+    .audioCodec('libmp3lame')
+    .format('mp4')
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .save(output_file)
+}
+//動画から連番画像作成
+const sample7 = async (input_file: string, output_file: string) => {
+  if (!fs.existsSync(output_file)) {
+    fs.mkdir(output_file, (err) => {
+      if (err) { throw err; }
+      console.log(`${output_file}が作成されました`);
+    });
+  }
+  ffmpeg(input_file)
+    .videoCodec('png')
+    .outputFps(30)
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .save(output_file + 'image_%03d.png')
+}
+//連番画像から動画作成
+const sample8 = async (input_file: string, output_file: string) => {
+  ffmpeg(input_file + 'image_%03d.png')
+    .inputFps(30)
+    .videoCodec('libx264')
+    .audioCodec('libmp3lame')
+    .outputFps(30)
+    .outputFormat('mp4')
+    .addOption('-pix_fmt yuv420p')
+    .on('start', () => { console.log(`変換開始`); })
+    .on('end', () => { console.log(`変換完了`); })
+    .on('error', function (err) { console.log('an error happened: ' + err.message); })
+    .save(output_file)
+}
 /*公式サイト　https://github.com/fluent-ffmpeg/node-fluent-ffmpeg
 参考サイト*/
 const ffmpegDefult = () => {
