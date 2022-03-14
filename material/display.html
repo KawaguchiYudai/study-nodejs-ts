@@ -12,30 +12,62 @@
 </style>
 
 <script>
+    let standbyList = [];
+    let callList = [];
+    let version = '';
+
     window.onload = () => {
         // WebSocketのクライアントの生成
         let ws = new WebSocket('ws://localhost:5001');
 
-        // 接続時に呼ばれる
-        ws.addEventListener('open', e => {
-            console.log('open')
+        ws.addEventListener("open", e => {
+            console.log("接続が開かれたときに呼び出されるイベント");
         });
 
-        // サーバからのデータ受信時に呼ばれる
-        ws.addEventListener('message', e => {
-            console.log(e.data)
+        ws.addEventListener("message", e => {
+            console.log(e.data);
+            console.log("サーバーからメッセージを受信したときに呼び出されるイベント");
+
+            const data = JSON.parse(e.data);
+            switch (data.action) {
+                case 'update':
+                    standbyList = data.standbyList;
+                    callList = data.callList;
+                    version = data.version;
+
+                    let standbytext = '';
+                    for (let i = 0; i < standbyList.length; i++) {
+                        if (i !== 0) standbytext += '\r\n';
+                        standbytext += standbyList[i];
+                    }
+                    document.getElementById('standby').innerText = standbytext;
+
+                    let calltext = '';
+                    for (let i = 0; i < callList.length; i++) {
+                        if (i !== 0) calltext += '\r\n';
+                        calltext += callList[i];
+                    }
+                    document.getElementById('call').innerText = calltext;
+                    break;
+            }
         });
 
-        // ボタンクリック時に呼ばれる
-        document.getElementById('send_button').addEventListener('click', e => {
-            // サーバへのデータ送信
-            ws.send('hello')
-        })
+        ws.addEventListener("close", e => {
+            console.log("接続が閉じられたときに呼び出されるイベント");
+        });
+
+        ws.addEventListener("error", e => {
+            console.log("エラーが発生したときに呼び出されるイベント");
+        });
     }
 </script>
 
 <body>
-    <input type="button" id="send_button"" value=" 送信">
+    <h1>待機</h1>
+    <h2 id="standby"></h2>
+
+    <h1>呼び出し</h1>
+    <h2 id="call"></h2>
 </body>
 
 </html>

@@ -12,30 +12,88 @@
 </style>
 
 <script>
+    let standbyList = [];
+    let callList = [];
+    let version = '';
+
     window.onload = () => {
         // WebSocketのクライアントの生成
         let ws = new WebSocket('ws://localhost:5001');
 
-        // 接続時に呼ばれる
-        ws.addEventListener('open', e => {
-            console.log('open')
+        ws.addEventListener("open", e => {
+            console.log("接続が開かれたときに呼び出されるイベント");
         });
 
-        // サーバからのデータ受信時に呼ばれる
-        ws.addEventListener('message', e => {
-            console.log(e.data)
+        ws.addEventListener("message", e => {
+            console.log(e.data);
+            console.log("サーバーからメッセージを受信したときに呼び出されるイベント");
+
+            const data = JSON.parse(e.data);
+            switch (data.action) {
+                case 'update':
+                    standbyList = data.standbyList;
+                    callList = data.callList;
+                    version = data.version;
+
+                    let standbytext = '';
+                    for (let i = 0; i < standbyList.length; i++) {
+                        if (i !== 0) standbytext += '\r\n';
+                        standbytext += standbyList[i];
+                    }
+                    document.getElementById('standby').innerText = standbytext;
+
+                    let calltext = '';
+                    for (let i = 0; i < callList.length; i++) {
+                        if (i !== 0) calltext += '\r\n';
+                        calltext += callList[i];
+                    }
+                    document.getElementById('call').innerText = calltext;
+                    break;
+            }
+        });
+
+        ws.addEventListener("close", e => {
+            console.log("接続が閉じられたときに呼び出されるイベント");
+        });
+
+        ws.addEventListener("error", e => {
+            console.log("エラーが発生したときに呼び出されるイベント");
         });
 
         // ボタンクリック時に呼ばれる
-        document.getElementById('send_button').addEventListener('click', e => {
+        document.getElementById('send').addEventListener('click', e => {
             // サーバへのデータ送信
-            ws.send('hello')
-        })
+            const action = document.getElementById('select').value;
+            const id = document.getElementById('text').value;
+
+            const data = {
+                action: action,
+                id: id
+            }
+            ws.send(JSON.stringify(data));
+        });
     }
 </script>
 
 <body>
-    <input type="button" id="send_button"" value=" 送信">
+    <h1>待機</h1>
+    <h2 id="standby"></h2>
+
+    <h1>呼び出し</h1>
+    <h2 id="call"></h2>
+
+
+    <h2>action</h2>
+    <select id="select">
+        <option value="">--Please choose an option--</option>
+        <option value="add">追加</option>
+        <option value="move-standby">待機</option>
+        <option value="move-call">呼び出し</option>
+        <option value="delete">削除</option>
+    </select>
+    <h2>id</h2>
+    <input type="text" id="text">
+    <input type="submit" id="send" value=" 送信">
 </body>
 
 </html>
