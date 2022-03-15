@@ -23,6 +23,7 @@
         let ws = new WebSocket('ws://localhost:5001');
 
         ws.addEventListener("open", e => {
+            document.getElementById('version').textContent = '接続しました';
             console.log("接続が開かれたときに呼び出されるイベント");
         });
 
@@ -51,18 +52,22 @@
                     }
                     break;
             }
+            document.getElementById('version').textContent = "最終接続 :" + version;
         });
 
         ws.addEventListener("close", e => {
+            document.getElementById('version').textContent = '接続が切れました';
             console.log("接続が閉じられたときに呼び出されるイベント");
         });
 
         ws.addEventListener("error", e => {
+            document.getElementById('version').textContent = '接続できません';
             console.log("エラーが発生したときに呼び出されるイベント");
         });
 
         // ボタンクリック時に呼ばれる
         document.getElementById('send_button').addEventListener('click', e => {
+            if (myid !== '') return;
             const data = {
                 action: 'create'
             }
@@ -76,6 +81,7 @@
     <h2 id="myid">発行をしてください </h2>
     <input type="button" id="send_button"" value=" 発行">
     <h2 id="status"></h2>
+    <h2 id="version">接続中</h2>
 </body>
 
 </html>

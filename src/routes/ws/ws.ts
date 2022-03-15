@@ -28,13 +28,23 @@ export const wsTest = () => {
 
     // 接続時に呼ばれる
     server.on('connection', (s: any) => {
+        console.log('接続しました');
+        let myid = '';
+        const updatedata = {
+            action: 'update',
+            standbyList: standbyList,
+            callList: callList,
+            version: (new Date().toString())
+        }
+        s.send(JSON.stringify(updatedata));
+
         // クライアントからのデータ受信時に呼ばれる
         s.on('message', (message: any) => {
-
             const data = JSON.parse(message.toString());
             switch (data.action) {
                 case 'create':
                     const id = Array.from(Array(N)).map(() => S[Math.floor(Math.random() * S.length)]).join('');
+                    myid = id;
                     standbyList.push(id);
                     const createdata = {
                         action: 'create',
@@ -77,7 +87,21 @@ export const wsTest = () => {
 
         // 切断時に呼ばれる
         s.on('close', () => {
-            console.log('close');
+            standbyList = standbyList.filter((element) => { return element !== myid });
+            callList = callList.filter((element) => { return element !== myid });
+
+            const senddata = {
+                action: 'update',
+                standbyList: standbyList,
+                callList: callList,
+                version: (new Date().toString())
+            }
+            // クライアントにデータを返信//全員に
+            server.clients.forEach((client: any) => {
+                client.send(JSON.stringify(senddata));
+            });
+
+            console.log(myid + 'の接続が切れました');
         });
     });
 }
