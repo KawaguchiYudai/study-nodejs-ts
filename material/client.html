@@ -18,13 +18,17 @@
     let callList = [];
     let version = '';
 
-    window.onload = () => {
+    let interval;
+
+    function access() {
         // WebSocketのクライアントの生成
         let ws = new WebSocket('ws://localhost:5001');
 
         ws.addEventListener("open", e => {
             document.getElementById('version').textContent = '接続しました';
             console.log("接続が開かれたときに呼び出されるイベント");
+            // if (interval != null) clearInterval(interval);
+
         });
 
         ws.addEventListener("message", e => {
@@ -58,6 +62,9 @@
         ws.addEventListener("close", e => {
             document.getElementById('version').textContent = '接続が切れました';
             console.log("接続が閉じられたときに呼び出されるイベント");
+            myid = '';
+            document.getElementById('myid').textContent = myid;
+            //interval = setInterval(() => { access(); }, 10000);
         });
 
         ws.addEventListener("error", e => {
@@ -72,8 +79,13 @@
                 action: 'create'
             }
             // サーバへのデータ送信
-            ws.send(JSON.stringify(data));
+            if (ws.readyState !== 3) ws.send(JSON.stringify(data));
         });
+    }
+
+
+    window.onload = () => {
+        access();
     }
 </script>
 

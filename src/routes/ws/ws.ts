@@ -24,7 +24,8 @@ data={
 */
 
 export const wsTest = () => {
-    let server = new ws.Server({ port: 5001 });
+    //let server = new ws.Server({ port: 5001 });
+    let server = new ws.WebSocketServer({ port: 5001 });
 
     // 接続時に呼ばれる
     server.on('connection', (s: any) => {
